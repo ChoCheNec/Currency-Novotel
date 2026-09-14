@@ -34,7 +34,7 @@
                 
                 if (data && data.length > 0) {
                     const rate = data[0].rate.toFixed(2);
-                    document.getElementById('rate').innerText = rate;
+                    document.getElementById('rate').innerText = '1 € = ' + rate + ' ₴';
                 }
             } catch (error) {
                 console.error('Помилка загрузки:', error);
