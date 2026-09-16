@@ -15,7 +15,6 @@
             background-color: transparent; 
         }
         .calculator {
-            /* Полупрозрачный белый фон карточки с легкой тенью */
             background: rgba(255, 255, 255, 0.95);
             padding: 40px;
             border-radius: 16px;
@@ -40,7 +39,7 @@
             transition: border-color 0.3s;
         }
         input:focus {
-            border-color: #0F204C; /* Темно-синий акцент */
+            border-color: #0F204C;
         }
         .result {
             font-size: 38px;
@@ -59,20 +58,16 @@
     <div class="calculator">
         <h2>Введіть суму в Євро</h2>
         
-        <!-- Поле для ввода чисел -->
         <input type="number" id="eurInput" placeholder="€ 0.00" min="0">
         
-        <!-- Блок для вывода результата -->
         <div class="result" id="uahResult">0,00 ₴</div>
         
-        <!-- Техническая информация о курсе -->
         <div class="rate-info" id="rateInfo">Завантаження курсу НБУ...</div>
     </div>
 
     <script>
         let currentRate = 0;
 
-        // 1. Функция загрузки курса (запускается один раз при старте)
         async function fetchRate() {
             try {
                 const response = await fetch('https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=EUR&json');
@@ -81,7 +76,7 @@
                 if (data && data.length > 0) {
                     currentRate = data[0].rate;
                     document.getElementById('rateInfo').innerText = `Офіційний курс НБУ: 1 € = ${currentRate.toFixed(2)} ₴`;
-                    calculate(); // Пересчитываем, если в поле уже что-то вписано
+                    calculate(); 
                 }
             } catch (error) {
                 console.error('Помилка завантаження:', error);
@@ -89,31 +84,25 @@
             }
         }
 
-        // 2. Функция моментального подсчета
         function calculate() {
             const eurValue = parseFloat(document.getElementById('eurInput').value);
             const resultDiv = document.getElementById('uahResult');
             
-            // Если поле пустое или ввели минус — показываем нули
             if (isNaN(eurValue) || eurValue <= 0) {
                 resultDiv.innerText = '0,00 ₴';
                 return;
             }
 
-            // Считаем и форматируем (разделяем тысячи пробелом)
             const exactUah = (eurValue * currentRate).toFixed(2);
             let parts = exactUah.toString().split('.');
             parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
             resultDiv.innerText = parts.join(',') + ' ₴';
         }
 
-        // 3. Слушатель событий: запускает расчет при каждом нажатии клавиши в поле
         document.getElementById('eurInput').addEventListener('input', calculate);
 
-        // Запуск инициализации
         fetchRate();
         
-        // Обновляем курс НБУ раз в час в фоновом режиме
         setInterval(fetchRate, 3600000);
     </script>
 </body>
