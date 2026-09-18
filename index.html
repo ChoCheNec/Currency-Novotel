@@ -1,72 +1,54 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Курс EUR/UAH НБУ</title>
     <style>
         body {
-            margin: 0;
-            padding: 0;
-            background-color: transparent; 
-            color: #474747;
-            font-family: 'Arial', sans-serif;
-            font-size: 40px; 
+            /* Прозрачный фон для наложения в VXT Canvas */
+            background: transparent; 
+            color: #ffffff; /* Цвет текста. Измените на #000000, если фон светлый */
+            font-family: 'SamsungOne', 'Segoe UI', Arial, sans-serif;
+            font-size: 72px; /* Размер шрифта */
             font-weight: bold;
+            margin: 0;
             display: flex;
-            justify-content: center;
-            align-items: center;
+            align-items: center; /* Выравнивание виджета */
+            justify-content: center; 
             height: 100vh;
-            overflow: hidden;
+        }
+        #exchange-rate {
+            /* Легкая тень для контраста поверх картинок */
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.6); 
         }
     </style>
 </head>
 <body>
-    <div id="rate">...</div>
+    <!-- Текст-заглушка, пока данные грузятся -->
+    <div id="exchange-rate">1 € = ... ₴</div>
 
     <script>
-        function fetchRate() {
-            var xhr = new XMLHttpRequest();
-            // Добавляем текущее время в конец URL (&_=12345...), 
-            // чтобы телевизор думал, что это новый адрес, и не брал данные из кэша
-            var url = 'https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=EUR&json&_=' + new Date().getTime();
-            
-            xhr.open('GET', url, true);
-            
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        try {
-                            var data = JSON.parse(xhr.responseText);
-                            if (data && data.length > 0) {
-                                var rate = data[0].rate.toFixed(2);
-                                document.getElementById('rate').innerText = '1 € = ' + rate + ' ₴';
-                            }
-                        } catch (error) {
-                            console.error('Помилка парсингу:', error);
-                            document.getElementById('rate').innerText = 'Помилка даних';
-                        }
-                    } else {
-                        // Ваша пасхалка сохранена :)
-                        console.error('Знов щось натикали... краще дзвоніть Петі', xhr.statusText);
-                    }
-                }
-            };
-            
-            // В телевизорах иногда нужно явно указывать таймаут
-            xhr.timeout = 10000; 
-            xhr.ontimeout = function () {
-                console.error('Таймаут. Дзвоніть Петі.');
-            };
+        async function fetchExchangeRate() {
+            try {
+                // Запрос к API НБУ для Евро
+                const response = await fetch('https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=EUR&json');
+                const data = await response.json();
+                const rate = data[0].rate;
 
-            xhr.send();
+                // Округление до 2 знаков после запятой (например, 41.56)
+                const formattedRate = rate.toFixed(2);
+
+                // Вывод на экран с символами
+                document.getElementById('exchange-rate').innerText = `1 € = ${formattedRate} ₴`;
+            } catch (error) {
+                console.error('Ошибка загрузки курса НБУ:', error);
+            }
         }
 
-        // Запуск при загрузке
-        fetchRate();
+        // Запуск сразу при включении панели
+        fetchExchangeRate();
         
-        // Обновление каждый час (3600000 мс)
-        setInterval(fetchRate, 3600000);
+        // Автоматическое обновление данных каждый час (3 600 000 миллисекунд)
+        setInterval(fetchExchangeRate, 3600000);
     </script>
 </body>
 </html>
