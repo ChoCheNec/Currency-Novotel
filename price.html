@@ -11,12 +11,16 @@
             background-color: transparent; 
             font-family: 'Arial', sans-serif;
             color: #999999; 
-            font-size: 25px; 
             
-            /* Выравнивание по правому краю для аккуратного столбика */
+            /* Делаем размер динамическим: 65% от высоты виджета */
+            font-size: 65vh; 
+            line-height: 1; /* Убираем лишние отступы */
+            
             display: flex;
             justify-content: flex-end; 
-            align-items: flex-start;
+            /* Выравниваем текст строго по центру виджета по вертикали */
+            align-items: center; 
+            
             height: 100vh;
             overflow: hidden;
         }
