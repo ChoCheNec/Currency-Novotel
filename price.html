@@ -5,27 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universal UAH Calculator</title>
     <style>
-        body {
+        html, body {
+            height: 100%;
+            width: 100%;
             margin: 0;
             padding: 0;
             background-color: transparent; 
+            overflow: hidden;
+        }
+        body {
             font-family: 'Arial', sans-serif;
             color: #999999; 
-            
-            /* Делаем размер динамическим: 65% от высоты виджета */
-            font-size: 65vh; 
-            line-height: 1; /* Убираем лишние отступы */
+            font-size: 45px; /* Жесткий размер шрифта, который поймет телевизор */
+            line-height: 1;
             
             display: flex;
-            justify-content: flex-end; 
-            /* Выравниваем текст строго по центру виджета по вертикали */
-            align-items: center; 
-            
-            height: 100vh;
-            overflow: hidden;
+            justify-content: flex-end; /* Прижимает текст вправо */
+            align-items: center; /* Центрирует текст по вертикали внутри виджета */
         }
         #result {
             white-space: nowrap;
+            padding-right: 5px; /* Небольшой отступ, чтобы цифры не прилипали вплотную к рамке виджета */
         }
     </style>
 </head>
