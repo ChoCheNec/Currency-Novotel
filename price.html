@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal UAH Calculator</title>
+    <title>Universal Calculator (EUR/UAH)</title>
     <style>
         html, body {
             height: 100%;
@@ -16,16 +16,17 @@
         body {
             font-family: 'Arial', sans-serif;
             color: #999999; 
-            font-size: 35px; /* Жесткий размер шрифта, который поймет телевизор */
+            /* Оставьте здесь тот размер, который вы подобрали на прошлом шаге (например, 38px) */
+            font-size: 38px; 
             line-height: 1;
             
             display: flex;
-            justify-content: flex-end; /* Прижимает текст вправо */
-            align-items: center; /* Центрирует текст по вертикали внутри виджета */
+            justify-content: flex-end; 
+            align-items: center; 
         }
         #result {
             white-space: nowrap;
-            padding-right: 5px; /* Небольшой отступ, чтобы цифры не прилипали вплотную к рамке виджета */
+            padding-right: 5px;
         }
     </style>
 </head>
@@ -37,32 +38,50 @@
             try {
                 const params = new URLSearchParams(window.location.search);
                 const eurParam = params.get('eur');
+                const uahParam = params.get('uah');
+                const resultDiv = document.getElementById('result');
                 
-                if (!eurParam) return;
+                // СЦЕНАРИЙ 1: Статичная цена в гривнах (например, ?uah=800)
+                if (uahParam) {
+                    let uah = parseFloat(uahParam).toFixed(2); // Делает 800.00
+                    let parts = uah.toString().split('.');
+                    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " "); // Разделяет тысячи
+                    
+                    // Выводим БЕЗ звездочки, так как цена не зависит от курса
+                    resultDiv.innerText = parts.join(',') + ' ₴';
+                    return; // Дальше код не идет, API НБУ не дергаем
+                }
                 
-                const eur = parseFloat(eurParam);
-
-                const response = await fetch('https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=EUR&json');
-                const data = await response.json();
-                
-                if (data && data.length > 0) {
-                    const rate = data[0].rate;
+                // СЦЕНАРИЙ 2: Динамическая цена из евро (например, ?eur=15)
+                if (eurParam) {
+                    const eur = parseFloat(eurParam);
+                    const response = await fetch('https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=EUR&json');
+                    const data = await response.json();
                     
-                    let exactUah = (eur * rate).toFixed(2);
-                    
-                    let parts = exactUah.toString().split('.');
-                    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-                    let formattedUah = '*' + parts.join(',') + ' ₴';
-                    
-                    document.getElementById('result').innerText = formattedUah;
+                    if (data && data.length > 0) {
+                        const rate = data[0].rate;
+                        let exactUah = (eur * rate).toFixed(2);
+                        
+                        let parts = exactUah.toString().split('.');
+                        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+                        
+                        // Выводим СО звездочкой, так как цена по курсу
+                        resultDiv.innerText = '*' + parts.join(',') + ' ₴';
+                    }
                 }
             } catch (error) {
-                console.error('Ошибка загрузки курса:', error);
+                console.error('Помилка завантаження курсу:', error);
             }
         }
 
+        // Запускаем функцию при загрузке
         fetchAndCalculate();
-        setInterval(fetchAndCalculate, 3600000);
+        
+        // Включаем ежечасное автообновление ТОЛЬКО если используем параметр ?eur
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('eur')) {
+            setInterval(fetchAndCalculate, 3600000);
+        }
     </script>
 </body>
 </html>
